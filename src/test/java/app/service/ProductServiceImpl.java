@@ -40,7 +40,7 @@ public class ProductServiceImpl implements ProductService {
     try {
       return objectMapper.readValue(json, Product.class);
     } catch (IOException e) {
-      throw new RequestException(String.format("Error to create Product, invalid json=[%s]", json));
+      throw new RequestException(String.format("Error to create Product, invalid json=[%s]", json), e);
     }
   }
 
