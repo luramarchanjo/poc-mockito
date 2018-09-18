@@ -24,7 +24,7 @@ public class ProductServiceImpl implements ProductService {
     Product product;
 
     Response response = httpClient.post("/api/v1/products", payload);
-    if (response.isSuccessful() && response.body() != null) {
+    if (response.isSuccessful()) {
       String body = response.body().toString();
       product = convertJsonToProduct(body);
     } else {
