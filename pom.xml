@@ -41,6 +41,14 @@
       <version>3.11.0</version>
     </dependency>
 
+    <!-- OkHttpClient Test -->
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>mockwebserver</artifactId>
+      <version>3.11.0</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Lombok -->
     <dependency>
       <groupId>org.projectlombok</groupId>

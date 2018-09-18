@@ -1,5 +1,8 @@
 package app;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import app.exception.RequestException;
 import app.payload.ProductPayload;
 import app.service.HttpClient;
@@ -11,17 +14,16 @@ import java.util.UUID;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Test;
-import static org.mockito.Mockito.*;
 
 public class TestApplication {
 
-  private final String url = "http://5b9d5606a4647e0014745172.mockapi.io";
-
   @Test(expected = RequestException.class)
-  public void testErrorRequest() throws IOException{
+  public void testWithoutLibrary() {
 
-    HttpClientMock httpClient = new HttpClientMock(url);
+    HttpClientMock httpClient = new HttpClientMock("http://google.com");
     ProductService productService = new ProductServiceImpl(httpClient);
 
     // Mock HttpClientMock
@@ -40,7 +42,7 @@ public class TestApplication {
 
     // Test request
     ProductPayload productPayload = ProductPayload.builder()
-      .model("Iphone Xr")
+      .model("Iphone XR")
       .price(5358.99)
       .build();
 
@@ -55,9 +57,37 @@ public class TestApplication {
       .build();
 
     HttpClient httpClient = mock(HttpClient.class);
-    when(httpClient.post("/api/v1/products", productPayload)).thenThrow(new RequestException("Test"));
+    when(httpClient.post("/api/v1/products", productPayload))
+      .thenThrow(new RequestException("Test"));
 
     ProductService productService = new ProductServiceImpl(httpClient);
+    productService.createProduct(productPayload);
+  }
+
+  @Test(expected = RequestException.class)
+  public void testMockWebServer() throws IOException {
+    // Start MockWebServer
+    MockWebServer mockWebServer = new MockWebServer();
+    mockWebServer.start();
+
+    // Mock response
+    MockResponse mockResponse = new MockResponse();
+    mockResponse.setResponseCode(500);
+    mockResponse.setBody("{}");
+
+    // Enqueue response
+    mockWebServer.enqueue(mockResponse);
+
+    // Test request
+    String url = String.format("http://%s:%s", mockWebServer.getHostName(), mockWebServer.getPort());
+    HttpClient httpClient = new HttpClientImpl(url);
+    ProductService productService = new ProductServiceImpl(httpClient);
+
+    ProductPayload productPayload = ProductPayload.builder()
+      .model("Iphone XR")
+      .price(5358.99)
+      .build();
+
     productService.createProduct(productPayload);
   }
 

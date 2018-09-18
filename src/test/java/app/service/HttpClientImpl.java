@@ -27,8 +27,9 @@ public class HttpClientImpl implements HttpClient {
   }
 
   public Response post(@NonNull String path, @NonNull Object payload) {
-    Response response = null;
+    Response response;
 
+    log.info(String.format("Calling endpoint POST - %s ", url + path));
     try {
       val jsonPayload = objectMapper.writeValueAsString(payload);
       RequestBody requestBody = RequestBody.create(mediaType, jsonPayload);
@@ -39,12 +40,13 @@ public class HttpClientImpl implements HttpClient {
         .build();
 
       Call call = httpClient.newCall(request);
-      call.execute();
+      response = call.execute();
     } catch (IOException e) {
       log.log(Level.SEVERE, "Error", e);
       throw new RequestException(String.format("Error to request POST=[%s]", payload), e);
     }
 
+    log.info(String.format("Received %s", response));
     return response;
   }
 

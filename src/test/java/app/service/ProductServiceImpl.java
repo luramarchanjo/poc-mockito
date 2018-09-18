@@ -5,9 +5,12 @@ import app.exception.RequestException;
 import app.payload.ProductPayload;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.logging.Level;
 import lombok.NonNull;
+import lombok.extern.java.Log;
 import okhttp3.Response;
 
+@Log
 public class ProductServiceImpl implements ProductService {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
@@ -18,16 +21,18 @@ public class ProductServiceImpl implements ProductService {
   }
 
   public Product createProduct(@NonNull ProductPayload payload) {
-    Product product = null;
+    Product product;
 
     Response response = httpClient.post("/api/v1/products", payload);
     if (response.isSuccessful() && response.body() != null) {
       String body = response.body().toString();
       product = convertJsonToProduct(body);
     } else {
-      throw new RequestException(String.format("Error to create Product=[%s]", payload));
+      throw new RequestException(
+        String.format("Error to create Product=[%s] Status=[%s]", payload, response.code()));
     }
 
+    log.log(Level.INFO, String.format("Created Product=[%s]", product));
     return product;
   }
 
